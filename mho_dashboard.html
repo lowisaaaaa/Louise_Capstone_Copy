@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MHO — Health</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
+    }
+  </style>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#90EE90",
+            "secondary": "#43A047",
+            "accent": "#A5D6A7",
+            "background-light": "#F9FAFB", // Gray-50
+            "background-dark": "#1F2937", // Gray-800
+            "text-light": "#1B5E20", // Green-800
+            "text-dark": "#F9FAFB", // Gray-50
+          },
+          fontFamily: {
+            "display": ["Roboto", "sans-serif"],
+            "body": ["Lato", "sans-serif"]
+          },
+          borderRadius: {
+            "DEFAULT": "0.5rem",
+            "lg": "0.75rem",
+            "xl": "1rem",
+            "full": "9999px"
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    nav button.active { text-decoration: underline; }
+    body {
+      font-family: 'Lato', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Roboto', sans-serif;
+    }
+
+    /* Upbar (Top Navigation) */
+    .upbar {
+      width: 100%;
+      background: #90EE90;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 68px;
+    }
+    .upbar .brand { display: flex; align-items: center; font-size: 20px; font-weight: bold; }
+    .upbar .brand img { height: 40px; margin-right: 8px; }
+    .upbar nav { display: flex; gap: 1rem; align-items: center; }
+    .upbar .upbar-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 10px 14px; border-radius: 4px; }
+    .upbar .upbar-btn:hover, .upbar .upbar-btn.active { background: #0056b3; color: white; }
+    .upbar a { background: #dc3545; color: white; text-decoration: none; padding: 10px 14px; border-radius: 4px; }
+    .upbar a:hover { background: #a71d2a; }
+
+
+
+    /* Main content */
+    .main-content { margin-top: 10px; padding: 1rem; }
+    footer.footer { text-align: center; padding: 1rem; background: #f1f1f1; margin-top: 1rem; }
+
+    /* Hide/show tabs */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Table & UI */
+    .table-container {
+      max-height: 450px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+    .table-container table {
+      font-size: 14px;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .table-container th,
+    .table-container td {
+      padding: 6px 8px;
+      white-space: nowrap;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      border-right: 1px solid #ddd;
+      font-size: 14px;
+    }
+    .table-container th {
+      background-color: #e9ecef;
+      color: #000;
+    }
+    .action-btn { margin-right:5px;padding:5px 10px;border:none;border-radius:4px;cursor:pointer; }
+    .edit-btn { background:#ffc107;color:#000; }
+    .delete-btn { background:#dc3545;color:#fff; }
+    .search-bar { margin-bottom:1rem;padding:0.5rem;width:100%;border:1px solid #ddd;border-radius:6px; }
+    .notification { padding:10px;margin-bottom:15px;border-radius:5px;background:#e9f7ef;color:#155724;display:block; }
+    .notif-item { margin-top:5px;padding:8px;border-radius:4px; }
+    .notif-item.available { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+
+    /* Forms */
+    .profile-card { display:flex;align-items:center;gap:1rem;border:1px solid #ddd;padding:1rem;border-radius:8px;margin-bottom:1rem;background:#fafafa; }
+    .profile-card img { width:60px;height:60px;border-radius:50%;background:#ccc; }
+    .account-form, .inventory-form { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;padding:15px;border:1px solid #eee;border-radius:8px;background-color:#f9f9f9; }
+    .account-form label, .inventory-form label { grid-column:span 2;font-weight:bold;margin-top:5px; }
+    .account-form input, .account-form select, .inventory-form input { grid-column:span 2;padding:8px;border:1px solid #ccc;border-radius:4px; }
+    .account-form button, .inventory-form button { grid-column:span 2;padding:10px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer; }
+    .account-form button:hover, .inventory-form button:hover { background:#0056b3; }
+
+    /* Dropdown */
+    .dropdown { position:relative; display:inline-block; }
+    .dropdown-content { display:none; position:absolute; top:100%; left:0; background:#fff; min-width:160px; border:1px solid #ccc; box-shadow:0px 8px 16px rgba(0,0,0,0.2); z-index:1; }
+    .dropdown-content button { width:100%; padding:10px; border:none; text-align:left; background:#fff; cursor:pointer; }
+    .dropdown-content button:hover { background:#f1f1f1; }
+    .dropdown:hover .dropdown-content { display:block; }
+    .dropdown-btn { padding:10px;background:#007bff;color:white;border:none;border-radius:5px;cursor:pointer; }
+
+    /* Sub-tabs styling */
+    .sub-tab-container {
+      border-bottom: 1px solid #e5e7eb; /* Gray-200 */
+      margin-bottom: 1.5rem;
+    }
+    .sub-tab-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #6b7280; /* Gray-500 */
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px; /* Overlap the container's border */
+    }
+    .sub-tab-btn:hover { color: #374151; /* Gray-700 */ }
+    .sub-tab-btn.active {
+      color: #90EE90; /* primary */
+      border-bottom-color: #90EE90; /* primary */
+      font-weight: 500;
+    }
+
+    /* Report Sub-tabs */
+    .report-tab-content { display: none; }
+    .report-tab-content.active { display: block; }
+
+    /* Logout Modal */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+    .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; text-align: center; border-radius: 8px; }
+    .modal-content p { margin-bottom: 20px; }
+    .modal-content button { margin: 0 10px; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+    #confirmLogout { background: #dc3545; color: white; }
+    #cancelLogout { background: #6c757d; color: white; }
+
+    .badge.vaccinated { background-color: #22c55e; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    .badge.not-vaccinated { background-color: #fbbf24; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+
+    .account-card { border: 1px solid #ddd; padding: 0.75rem; border-radius: 8px; background: #fafafa; margin-bottom: 0.5rem; }
+    .barangay-container { margin-bottom: 1rem; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark">
+  <!-- Header -->
+  <header class="flex items-center justify-between whitespace-nowrap bg-primary px-6 py-4 shadow-md sticky top-0 z-50">
+    <div class="flex items-center gap-2 sm:gap-4 text-text-light dark:text-text-dark">
+      <span class="material-symbols-outlined text-3xl sm:text-4xl text-primary">health_and_safety</span>
+      <h2 class="text-xl sm:text-2xl font-bold leading-tight tracking-[-0.015em] font-display">MHO Dashboard</h2>
+    </div>
+    <nav class="flex items-center gap-4">
+      <button class="text-lg font-medium leading-normal hover:text-primary transition-colors active" onclick="switchTab('home', this)">Home</button>
+      <button class="text-lg font-medium leading-normal hover:text-primary transition-colors" onclick="switchTab('reports', this)">Records and Analytics</button>
+      <button class="text-lg font-medium leading-normal hover:text-primary transition-colors" onclick="switchTab('accounts', this)">Account Management</button>
+      <button class="text-lg font-medium leading-normal hover:text-primary transition-colors" onclick="switchTab('schedule', this)">Schedule</button>
+
+      <button onclick="logout()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 sm:h-12 sm:px-6 bg-primary text-white text-sm sm:text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-opacity">
+        <span class="truncate">Logout</span>
+      </button>
+    </nav>
+  </header>
+
+
+
+  <!-- Main Content -->
+  <main class="container max-w-full mx-auto px-20 py-8">
+    <!-- Home -->
+    <section id="home" class="tab-content active">
+      <h2>Welcome to MHO Dashboard</h2>
+      <p>This is the home page of the Municipal Health Office dashboard. Here you can manage child immunization records, view reports, handle accounts, schedule distributions, and check medical needs.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="bg-blue-100 p-4 rounded-lg text-center">
+          <h3 class="text-lg font-semibold">Total Children</h3>
+          <p id="totalChildren" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg text-center">
+          <h3 class="text-lg font-semibold">Fully Vaccinated</h3>
+          <p id="fullyVaccinated" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg text-center">
+          <h3 class="text-lg font-semibold">Pending Vaccines</h3>
+          <p id="pendingVaccines" class="text-2xl font-bold">0</p>
+        </div>
+        <div class="bg-purple-100 p-4 rounded-lg text-center">
+          <h3 class="text-lg font-semibold">BHWs/BNSs</h3>
+          <p id="totalAccounts" class="text-2xl font-bold">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reports -->
+    <section id="reports" class="tab-content">
+      <div class="flex justify-between items-center mb-4">
+  <div class="sub-tab-container">
+    <button class="sub-tab-btn report-tab-btn active" data-tab="records">Records</button>
+    <button class="sub-tab-btn report-tab-btn" data-tab="analytics">Analytics</button>
+    <button class="sub-tab-btn report-tab-btn" data-tab="medical-needs">Medical Needs</button>
+  </div>
+        <div class="flex gap-2">
+          <div class="relative inline-block">
+            <button class="btn bg-white border border-gray-300 rounded-md px-4 py-2" onclick="toggleFilterDropdown()">Filter ▼</button>
+          </div>
+          <div class="dropdown">
+            <button class="btn bg-white border border-gray-300 rounded-md px-4 py-2">Download Data ▼</button>
+            <div class="dropdown-content">
+              <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadData('csv')">Download as CSV</button>
+              <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadData('excel')">Download as Excel</button>
+              <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadData('pdf')">Download as PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="filter-bar" id="filterBar" style="display:none; position: absolute; right: 20rem; z-index: 20;">
+        <div class="bg-white shadow-md p-4 rounded-lg mt-2 relative">
+          <button onclick="toggleFilterDropdown()" class="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+          <div class="flex gap-6 items-start">
+            <div>
+              <h4 class="font-medium text-sm mb-2 border-b">Barangay</h4>
+              <div id="barangayFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                <!-- Barangay checkboxes will be populated by JS -->
+              </div>
+            </div>
+            <div>
+              <h4 class="font-medium text-sm mb-2 border-b">Year</h4>
+              <div id="yearFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                <!-- Year checkboxes will be populated by JS -->
+              </div>
+            </div>
+            <div>
+              <h4 class="font-medium text-sm mb-2 border-b">Month</h4>
+              <div id="monthFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                <!-- Month checkboxes will be populated by JS -->
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-3 items-center mt-4">
+            <button onclick="applyFilter()" class="bg-primary text-white px-3 py-1 text-sm rounded-md hover:bg-secondary transition">Apply</button>
+            <button onclick="clearFilter()" class="bg-gray-500 text-white px-3 py-1 text-sm rounded-md hover:bg-gray-600 transition">Clear</button>
+          </div>
+        </div>
+      </div>
+      <div id="filterInfo" class="text-sm text-gray-600 mt-2" style="display: none;"></div>
+
+      <section id="records" class="report-tab-content active">
+        <h3>Children Records</h3>
+        <div class="table-container">
+          <table id="mhoTable" class="table">
+            <thead>
+              <tr>
+                <th>Name of Children</th><th>Age in Months</th><th>Date of Birth</th><th>Name of Parent</th><th>Barangay</th><th>Sector</th><th>Report Date</th>
+  <th>BCG (At Birth)</th><th>HEPA B (At Birth)</th><th>PENTA 1 ( 1 1/2 mos.)</th><th>PENTA 2 ( 2 1/2 mos.)</th><th>PENTA 3 ( 3 1/2 mos.)</th>
+  <th>OPV 1  ( 1 1/2 mos.)</th><th>OPV 2  ( 2 1/2 mos.)</th><th>OPV 3  ( 3 1/2 mos.)</th><th>IPV1  ( 3 1/2 mos.)</th><th>IPV2  ( 9 mos.)</th>
+  <th>PCV1  ( 1 1/2 mos.)</th><th>PCV2  ( 2 1/2 mos.)</th><th>PCV3  ( 3 1/2 mos.)</th><th>MCV1 (9 mos.)</th><th>MCV2 (12 mos. & 29 days)</th>
+                <th>BHW Email</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <p id="mhoEmpty" style="display:none;">No records yet.</p>
+        </div>
+      </section>
+
+      <section id="analytics" class="report-tab-content">
+        <div style="display:flex;gap:1rem;margin-top:1rem;flex-wrap:wrap; justify-content:center;">
+          <div style="flex:0 0 720px;"><h3>Vaccine Completion</h3><canvas id="pieChart" width="720" height="340"></canvas></div>
+          <div style="flex:0 0 720px;"><h3>Vaccines Given</h3><canvas id="barChart" width="720" height="340"></canvas></div>
+        </div>
+      </section>
+
+      <section id="medical-needs" class="report-tab-content">
+        <h3>Children Medical Needs</h3>
+        <div class="table-container">
+          <table id="needsTable" class="table-auto w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th class="bg-gray-100 border border-gray-300 px-4 py-2 text-left">Name of Children</th>
+                <th class="bg-gray-100 border border-gray-300 px-4 py-2 text-left">Age in Months</th>
+                <th class="bg-gray-100 border border-gray-300 px-4 py-2 text-left">Date of Birth</th>
+                <th class="bg-gray-100 border border-gray-300 px-4 py-2 text-left">Name of Parent</th>
+                <th class="bg-gray-100 border border-gray-300 px-4 py-2 text-left">Needs</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <p id="needsEmpty" style="display:none;">All children are up-to-date.</p>
+        </div>
+      </section>
+    </section>
+
+    <!-- Accounts -->
+    <section id="accounts" class="tab-content">
+      <h2>Manage Accounts</h2>
+      <div class="profile-card">
+        <img src="assets/mho.png" alt="MHO">
+        <div><strong>Municipal Health Office</strong><br>Email: mho@gmail.com<br>Password: password</div>
+      </div>
+      <div class="sub-tab-container">
+        <button class="sub-tab-btn account-tab-btn active" data-tab="create">Create New Account</button>
+        <button class="sub-tab-btn account-tab-btn" data-tab="existing">Existing Accounts</button>
+      </div>
+      <div id="create" class="account-tab-content active">
+        <div class="bg-white p-6 rounded-lg shadow-md border">
+          <h3 class="text-lg font-semibold mb-4">Create New Account</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">First Name:</label>
+              <input type="text" id="accountFirstName" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Last Name:</label>
+              <input type="text" id="accountLastName" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Birthday:</label>
+              <input type="date" id="accountBirthday" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Age:</label>
+              <input type="number" id="accountAge" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Email:</label>
+              <input type="email" id="accountEmail" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Phone Number:</label>
+              <input type="tel" id="accountNumber" pattern="[0-9]{11}" title="Must be exactly 11 digits" maxlength="11" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Role:</label>
+              <select id="accountRole" class="w-full p-2 border border-gray-300 rounded-md" required>
+                <option value="BNS">BNS</option>
+                <option value="BHW">BHW</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Barangay:</label>
+              <select id="accountBarangay" class="w-full p-2 border border-gray-300 rounded-md" required></select>
+            </div>
+
+            <div id="sectorField" class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1">Sector (for BHW only):</label>
+              <input type="number" id="accountSector" placeholder="e.g. 1" min="1" class="w-full p-2 border border-gray-300 rounded-md">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1">Password:</label>
+              <input type="text" id="accountPassword" value="password" readonly class="w-full p-2 border border-gray-300 rounded-md bg-gray-100">
+            </div>
+            <div class="md:col-span-2">
+              <button onclick="addAccount()" class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-secondary transition">Add Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="existing" class="account-tab-content">
+        <h3>Existing Accounts</h3>
+        <div class="flex gap-2 items-center mb-4">
+          <label for="barangaySelectAccounts" class="font-medium">Barangay:</label>
+          <select id="barangaySelectAccounts" class="rounded-md border border-gray-300 px-2 py-1" onchange="renderAccounts()">
+            <option value="all">All</option>
+          </select>
+        </div>
+        <div id="accountsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2"></div>
+      </div>
+    </section>
+
+
+
+    <!-- Schedule -->
+    <section id="schedule" class="tab-content">
+      <h2>Distribution Schedule</h2>
+      <label><strong>Filter by Month:</strong></label>
+      <input type="month" id="filterMonth" onchange="renderSchedule()">
+      <div id="scheduleList" class="notification" style="margin-top:10px;"></div>
+    </section>
+
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // Barangays
+    const BARANGAYS=["Abiacao","Bagong Tubig","Balagtasin","Balite","Banoyo","Boboy","Bonliw","Calumpang East","Calumpang West","Dulangan","Durungao","Locloc","Luya","Mahabang Parang","Manggahan","Muzon","San Antonio","San Isidro","San Jose","San Martin","Santa Monica","Taliba","Talon","Tejero","Tungal","Poblacion"];
+    const YEARS = [2019, 2020, 2021, 2022, 2023, 2024, 2025];
+    const MONTHS = [{v:"01",l:"January"},{v:"02",l:"February"},{v:"03",l:"March"},{v:"04",l:"April"},{v:"05",l:"May"},{v:"06",l:"June"},{v:"07",l:"July"},{v:"08",l:"August"},{v:"09",l:"September"},{v:"10",l:"October"},{v:"11",l:"November"},{v:"12",l:"December"}];
+    
+    const barangaySelectAccount=document.getElementById('accountBarangay');
+    const barangaySelectAccounts=document.getElementById('barangaySelectAccounts');
+    BARANGAYS.forEach(b=>{
+      let o=document.createElement('option');
+      o.value=b;
+      o.textContent=b;
+      barangaySelectAccount.appendChild(o.cloneNode(true));
+      barangaySelectAccounts.appendChild(o.cloneNode(true));
+    });
+
+    const barangayContainer = document.getElementById('barangayFilterContainer');
+    barangayContainer.innerHTML = `
+      <label class="flex items-center text-sm font-semibold">
+        <input type="checkbox" name="barangay" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+        <span class="ml-2">Select All</span>
+      </label>
+    `;
+    BARANGAYS.forEach(b => {
+      barangayContainer.innerHTML += `
+        <label class="flex items-center text-sm">
+          <input type="checkbox" name="barangay" value="${b}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+          <span class="ml-2">${b}</span>
+        </label>
+      `;
+    });
+
+    const yearContainer = document.getElementById('yearFilterContainer');
+    yearContainer.innerHTML = `
+      <label class="flex items-center text-sm font-semibold">
+        <input type="checkbox" name="year" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+        <span class="ml-2">Select All</span>
+      </label>
+    `;
+    YEARS.forEach(y => {
+      yearContainer.innerHTML += `
+        <label class="flex items-center text-sm">
+          <input type="checkbox" name="year" value="${y}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+          <span class="ml-2">${y}</span>
+        </label>
+      `;
+    });
+
+    const monthContainer = document.getElementById('monthFilterContainer');
+    monthContainer.innerHTML = `
+      <label class="flex items-center text-sm font-semibold">
+        <input type="checkbox" name="month" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+        <span class="ml-2">Select All</span>
+      </label>
+    `;
+    MONTHS.forEach(month => {
+      monthContainer.innerHTML += `
+        <label class="flex items-center text-sm">
+          <input type="checkbox" name="month" value="${month.v}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+          <span class="ml-2">${month.l}</span>
+        </label>
+      `;
+    });
+
+    function setupFilterCheckboxes(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const selectAll = container.querySelector('input[value="all"]');
+        const options = container.querySelectorAll('.filter-option');
+        if (!selectAll) return;
+        selectAll.addEventListener('change', () => {
+            options.forEach(opt => opt.checked = selectAll.checked);
+        });
+    }
+
+
+    function toggleFilterDropdown() {
+      const d = document.getElementById('filterBar');
+      d.style.display = d.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function applyFilter() {
+      toggleFilterDropdown();
+      const selectedBarangays = Array.from(document.querySelectorAll('#barangayFilterContainer input:checked')).map(cb => cb.value);
+      const selectedYears = Array.from(document.querySelectorAll('#yearFilterContainer input:checked')).map(cb => cb.value);
+      const selectedMonths = Array.from(document.querySelectorAll('#monthFilterContainer input:checked')).map(cb => cb.value);
+      updateFilterInfo(selectedBarangays, selectedYears, selectedMonths);
+      renderFilteredData();
+      if (document.querySelector('.report-tab-btn.active').dataset.tab === 'medical-needs') {
+        renderNeedsTable();
+      }
+    }
+
+    function clearFilter() {
+      document.querySelectorAll('#filterBar input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      updateFilterInfo([], [], []);
+      renderFilteredData();
+      toggleFilterDropdown();
+      if (document.querySelector('.report-tab-btn.active').dataset.tab === 'medical-needs') {
+        renderNeedsTable();
+      }
+    }
+
+    function updateFilterInfo(barangays, years, months) {
+      const infoDiv = document.getElementById('filterInfo');
+      let infoText = [];
+      if (barangays.length > 0) {
+        infoText.push(`<strong>Barangay:</strong> ${barangays.join(', ')}`);
+      }
+      if (years.length > 0) {
+        infoText.push(`<strong>Year:</strong> ${years.join(', ')}`);
+      }
+      if (months.length > 0) {
+        const monthNames = months.map(mVal => MONTHS.find(m => m.v === mVal)?.l || mVal);
+        infoText.push(`<strong>Months:</strong> ${monthNames.join(', ')}`);
+      }
+
+      if (infoText.length > 0) {
+        infoDiv.innerHTML = `Filtering by: ${infoText.join('; ')}`;
+        infoDiv.style.display = 'block';
+      } else {
+        infoDiv.style.display = 'none';
+      }
+    }
+
+    let currentMHOData = [];
+
+    function loadAllChildrenData() {
+      let allData = [];
+      const bhwBnsProfiles = JSON.parse(localStorage.getItem("bhwBnsProfiles") || "[]");
+      bhwBnsProfiles.forEach(p => {
+        if (p.role === "BHW") {
+          const key = `hp_children_${p.barangay}__${p.sector}`;
+          const data = JSON.parse(localStorage.getItem(key) || "[]");
+          data.forEach(child => {
+            if (!child.bhwEmail) child.bhwEmail = p.email;
+          });
+          allData = allData.concat(data);
+        }
+      });
+      return allData;
+    }
+
+    function mapChildData(child) {
+      return {
+        "Name of Children": child["Name of Children"] || "",
+        "Age in Months": child["Age in Months"] || "",
+        "Date of Birth": child["Date of Birth"] || "",
+        "Name of Parent": child["Name of Parent"] || "",
+        Barangay: child.Barangay || "",
+        Sector: child.Sector || "",
+        "Report Date": child["Report Date"] || "",
+        bhwEmail: child.bhwEmail || "",
+        "BCG (At Birth)": child["BCG (At Birth)"] || "",
+        "HEPA B (At Birth)": child["HEPA B (At Birth)"] || "",
+        "PENTA 1 ( 1 1/2 mos.)": child["PENTA 1 ( 1 1/2 mos.)"] || "",
+        "PENTA 2 ( 2 1/2 mos.)": child["PENTA 2 ( 2 1/2 mos.)"] || "",
+        "PENTA 3 ( 3 1/2 mos.)": child["PENTA 3 ( 3 1/2 mos.)"] || "",
+        "OPV 1  ( 1 1/2 mos.)": child["OPV 1  ( 1 1/2 mos.)"] || "",
+        "OPV 2  ( 2 1/2 mos.)": child["OPV 2  ( 2 1/2 mos.)"] || "",
+        "OPV 3  ( 3 1/2 mos.)": child["OPV 3  ( 3 1/2 mos.)"] || "",
+        "IPV1  ( 3 1/2 mos.)": child["IPV1  ( 3 1/2 mos.)"] || "",
+        "IPV2  ( 9 mos.)": child["IPV2  ( 9 mos.)"] || "",
+        "PCV1  ( 1 1/2 mos.)": child["PCV1  ( 1 1/2 mos.)"] || "",
+        "PCV2  ( 2 1/2 mos.)": child["PCV2  ( 2 1/2 mos.)"] || "",
+        "PCV3  ( 3 1/2 mos.)": child["PCV3  ( 3 1/2 mos.)"] || "",
+        "MCV1 (9 mos.)": child["MCV1 (9 mos.)"] || "",
+        "MCV2 (12 mos. & 29 days)": child["MCV2 (12 mos. & 29 days)"] || ""
+      };
+    }
+
+    function formatReportDateForDisplay(reportDate) {
+      if (!reportDate || !reportDate.includes('/')) return reportDate || '';
+      const [month, year] = reportDate.split('/');
+      const monthName = MONTHS.find(m => m.v === month)?.l || 'Unknown';
+      return `${monthName} ${year}`;
+    }
+
+    function renderMHOTable(data) {
+      const tbody = document.querySelector('#mhoTable tbody');
+      tbody.innerHTML = "";
+      if (data.length === 0) {
+        document.getElementById('mhoEmpty').style.display = 'block';
+        return;
+      }
+      document.getElementById('mhoEmpty').style.display = 'none';
+      data.forEach(child => {
+        const mapped = mapChildData(child);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${mapped["Name of Children"]}</td>
+          <td>${mapped["Age in Months"]}</td>
+          <td>${mapped["Date of Birth"]}</td>
+          <td>${mapped["Name of Parent"]}</td>
+          <td>${mapped.Barangay}</td>
+          <td>${mapped.Sector}</td>
+          <td>${formatReportDateForDisplay(mapped["Report Date"])}</td>
+          <td><span class="badge ${mapped["BCG (At Birth)"]?"vaccinated":"not-vaccinated"}">${mapped["BCG (At Birth)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["HEPA B (At Birth)"]?"vaccinated":"not-vaccinated"}">${mapped["HEPA B (At Birth)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PENTA 1 ( 1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PENTA 1 ( 1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PENTA 2 ( 2 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PENTA 2 ( 2 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PENTA 3 ( 3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PENTA 3 ( 3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["OPV 1  ( 1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["OPV 1  ( 1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["OPV 2  ( 2 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["OPV 2  ( 2 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["OPV 3  ( 3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["OPV 3  ( 3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["IPV1  ( 3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["IPV1  ( 3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["IPV2  ( 9 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["IPV2  ( 9 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PCV1  ( 1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PCV1  ( 1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PCV2  ( 2 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PCV2  ( 2 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["PCV3  ( 3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["PCV3  ( 3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["MCV1 (9 mos.)"]?"vaccinated":"not-vaccinated"}">${mapped["MCV1 (9 mos.)"] || "Not Vaccinated"}</span></td>
+          <td><span class="badge ${mapped["MCV2 (12 mos. & 29 days)"]?"vaccinated":"not-vaccinated"}">${mapped["MCV2 (12 mos. & 29 days)"] || "Not Vaccinated"}</span></td>
+          <td>${mapped.bhwEmail}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderCharts(data) {
+      // Pie chart: Vaccine Completion
+      const fullyVaccinated = data.filter(child => {
+        const vaccines = ["BCG (At Birth)", "HEPA B (At Birth)", "PENTA 1 ( 1 1/2 mos.)", "PENTA 2 ( 2 1/2 mos.)", "PENTA 3 ( 3 1/2 mos.)", "OPV 1  ( 1 1/2 mos.)", "OPV 2  ( 2 1/2 mos.)", "OPV 3  ( 3 1/2 mos.)", "IPV1  ( 3 1/2 mos.)", "IPV2  ( 9 mos.)", "PCV1  ( 1 1/2 mos.)", "PCV2  ( 2 1/2 mos.)", "PCV3  ( 3 1/2 mos.)", "MCV1 (9 mos.)", "MCV2 (12 mos. & 29 days)"];
+        return vaccines.every(v => child[v]); // if date present
+      }).length;
+      const notFully = data.length - fullyVaccinated;
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['Fully Vaccinated', 'Not Fully Vaccinated'],
+          datasets: [{
+            data: [fullyVaccinated, notFully],
+            backgroundColor: ['#28a745', '#dc3545']
+          }]
+        }
+      });
+
+      // Bar chart: Vaccines Given
+      const vaccineCounts = {};
+      const vaccines = ["BCG (At Birth)", "HEPA B (At Birth)", "PENTA 1 ( 1 1/2 mos.)", "PENTA 2 ( 2 1/2 mos.)", "PENTA 3 ( 3 1/2 mos.)", "OPV 1  ( 1 1/2 mos.)", "OPV 2  ( 2 1/2 mos.)", "OPV 3  ( 3 1/2 mos.)", "IPV1  ( 3 1/2 mos.)", "IPV2  ( 9 mos.)", "PCV1  ( 1 1/2 mos.)", "PCV2  ( 2 1/2 mos.)", "PCV3  ( 3 1/2 mos.)", "MCV1 (9 mos.)", "MCV2 (12 mos. & 29 days)"];
+      vaccines.forEach(v => vaccineCounts[v] = 0);
+      data.forEach(child => {
+        vaccines.forEach(v => {
+          if (child[v]) vaccineCounts[v]++; // if date present
+        });
+      });
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: vaccines,
+          datasets: [{
+            label: 'Vaccines Given',
+            data: vaccines.map(v => vaccineCounts[v]),
+            backgroundColor: '#007bff'
+          }]
+        }
+      });
+    }
+
+    function renderFilteredData() {
+      let data = loadAllChildrenData();
+      const selectedBarangays = Array.from(document.querySelectorAll('#barangayFilterContainer input:checked')).map(cb => cb.value);
+      const selectedYears = Array.from(document.querySelectorAll('#yearFilterContainer input:checked')).map(cb => cb.value);
+      const selectedMonths = Array.from(document.querySelectorAll('#monthFilterContainer input:checked')).map(cb => cb.value);
+
+      if (selectedBarangays.length > 0) {
+        data = data.filter(child => selectedBarangays.includes(child.Barangay));
+      }
+
+      const hasYearFilter = selectedYears.length > 0;
+      const hasMonthFilter = selectedMonths.length > 0;
+
+      if (hasYearFilter || hasMonthFilter) {
+          data = data.filter(child => {
+              // Prioritize Report Date for filtering
+              if (child["Report Date"] && child["Report Date"].includes('/')) {
+                  const [reportMonth, reportYear] = child["Report Date"].split('/');
+                  const yearMatches = !hasYearFilter || selectedYears.includes(reportYear);
+                  const monthMatches = !hasMonthFilter || selectedMonths.includes(reportMonth);
+                  return yearMatches && monthMatches;
+              }
+              // Fallback for old data without Report Date (using DOB)
+              const dob = child["Date of Birth"]; // e.g., "mm/dd/yyyy"
+              if (dob && dob.includes('/')) {
+                  const [dobMonth, , dobYear] = dob.split('/');
+                  const yearMatches = !hasYearFilter || selectedYears.includes(dobYear);
+                  const monthMatches = !hasMonthFilter || selectedMonths.includes(dobMonth.padStart(2, '0'));
+                  return yearMatches && monthMatches;
+              }
+              return false; // No date to filter by
+          });
+      }
+
+      currentMHOData = data;
+      renderMHOTable(data);
+      renderCharts(data);
+    }
+
+    // Initial load
+    renderFilteredData();
+
+    // Tabs
+    function switchTab(tab, btn) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      btn.classList.add('active');
+      if(tab === 'schedule') renderSchedule();
+    }
+
+    // Accounts
+    let bhwBnsProfiles=JSON.parse(localStorage.getItem("bhwBnsProfiles")||"[]"); 
+    function saveProfiles(){localStorage.setItem("bhwBnsProfiles",JSON.stringify(bhwBnsProfiles));}
+    function addAccount(){
+      const fn = document.getElementById('accountFirstName').value.trim();
+      const ln = document.getElementById('accountLastName').value.trim();
+      const bd = document.getElementById('accountBirthday').value;
+      const age = document.getElementById('accountAge').value;
+      const e = document.getElementById('accountEmail').value.toLowerCase().trim();
+      const num = document.getElementById('accountNumber').value;
+      const r = document.getElementById('accountRole').value;
+      const b = document.getElementById('accountBarangay').value;
+      let s = document.getElementById('accountSector').value;
+      if (r === 'BNS') s = '';
+
+      if (!fn || !ln || !bd || !e || !num || (r !== "MHO" && !b) || num.length !== 11) {
+        alert("Please fill all required fields. Phone number must be exactly 11 digits.");
+        return;
+      }
+
+      if (confirm('Are you sure you want to create this account?')) {
+        const n = fn + ' ' + ln;
+        const p = document.getElementById('accountPassword').value;
+        bhwBnsProfiles.push({name:n, firstName:fn, lastName:ln, birthday:bd, age:age, email:e, number:num, role:r, barangay:b, sector:s, password:p});
+        saveProfiles();
+        
+        // Clear fields
+        document.getElementById('accountFirstName').value = '';
+        document.getElementById('accountLastName').value = '';
+        document.getElementById('accountBirthday').value = '';
+        document.getElementById('accountAge').value = '';
+        document.getElementById('accountEmail').value = '';
+        document.getElementById('accountNumber').value = '';
+        document.getElementById('accountBarangay').value = BARANGAYS[0];
+        document.getElementById('accountSector').value = '';
+        alert('Account added successfully!');
+      }
+    }
+    function renderAccounts(){
+      const container = document.getElementById('accountsContainer');
+      container.innerHTML = '';
+      const selectedBarangay = document.getElementById('barangaySelectAccounts').value;
+      let filtered = bhwBnsProfiles;
+      if (selectedBarangay !== 'all') {
+        filtered = bhwBnsProfiles.filter(p => p.barangay === selectedBarangay);
+      }
+      if (filtered.length === 0) {
+        container.innerHTML = `<p>No accounts${selectedBarangay !== 'all' ? ' in ' + selectedBarangay : ''}.</p>`;
+        return;
+      }
+
+      if (selectedBarangay === 'all') {
+        container.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4', 'gap-2');
+        let grouped = {};
+        filtered.forEach(p => {
+          const brgy = p.barangay || "Unassigned";
+          if (!grouped[brgy]) grouped[brgy] = [];
+          grouped[brgy].push(p);
+        });
+        Object.keys(grouped).sort().forEach(barangay => {
+          const barangayDiv = document.createElement('div');
+          barangayDiv.className = 'barangay-container';
+          barangayDiv.innerHTML = `<h4 class="text-lg font-semibold mb-2 border-b">${barangay}</h4>`;
+          const gridDiv = document.createElement('div');
+          gridDiv.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2';
+          grouped[barangay].forEach(p => gridDiv.appendChild(createAccountCard(p)));
+          barangayDiv.appendChild(gridDiv);
+          container.appendChild(barangayDiv);
+        });
+      } else {
+        container.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2';
+        filtered.forEach(p => container.appendChild(createAccountCard(p)));
+      }
+    }
+    function createAccountCard(p) {
+      const card = document.createElement('div');
+      card.className = 'account-card';
+      const index = bhwBnsProfiles.indexOf(p);
+
+      if (editingIndex === index) {
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div><strong>Name:</strong> <input id='editName' value='${p.name}' class='w-full p-1 border rounded text-sm'></div>
+            <div><strong>Email:</strong> <input id='editEmail' value='${p.email}' class='w-full p-1 border rounded text-sm'></div>
+            <div><strong>Number:</strong> <input id='editNumber' value='${p.number || ''}' class='w-full p-1 border rounded text-sm'></div>
+            <p><strong>Role:</strong> ${p.role}</p>
+            <p><strong>Barangay:</strong> ${p.barangay}</p>
+            <p><strong>Sector:</strong> ${p.sector || 'N/A'}</p>
+          </div>
+          <div class="mt-2">
+            <button onclick='saveAccount(${index})' class='bg-green-500 text-white px-3 py-1 rounded text-sm mr-2'>Save</button>
+            <button onclick='cancelEdit()' class='bg-gray-500 text-white px-3 py-1 rounded text-sm'>Cancel</button>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="space-y-1">
+            <p><strong>Name:</strong> ${p.name}</p>
+            <p><strong>Email:</strong> ${p.email}</p>
+            <p><strong>Number:</strong> ${p.number || ''}</p>
+            <p><strong>Role:</strong> ${p.role}</p>
+            <p><strong>Barangay:</strong> ${p.barangay}</p>
+            <p><strong>Sector:</strong> ${p.sector || 'N/A'}</p>
+          </div>
+          <div class="mt-2">
+            <button onclick='editAccount(${index})' class='bg-amber-500 text-white px-3 py-1 rounded text-sm mr-2'>Edit</button>
+            <button onclick='deleteAccount(${index})' class='bg-red-500 text-white px-3 py-1 rounded text-sm'>Delete</button>
+          </div>
+        `;
+      }
+      return card;
+    }
+    let editingIndex = -1;
+    function editAccount(i) { editingIndex = i; renderAccounts(); }
+    function saveAccount(i) {
+      let n = document.getElementById('editName').value.trim();
+      let e = document.getElementById('editEmail').value.trim();
+      let num = document.getElementById('editNumber').value.trim();
+      if (n && e) {
+        bhwBnsProfiles[i].name = n;
+        bhwBnsProfiles[i].email = e;
+        bhwBnsProfiles[i].number = num;
+        saveProfiles();
+        editingIndex = -1;
+        renderAccounts();
+      } else {
+        alert("Name and Email cannot be empty.");
+      }
+    }
+    function cancelEdit() { editingIndex = -1; renderAccounts(); }
+    function deleteAccount(i){
+      if (confirm(`Are you sure you want to delete the account for ${bhwBnsProfiles[i].name}?`)) {
+        bhwBnsProfiles.splice(i,1);
+        saveProfiles();
+        renderAccounts();
+      }
+    }
+
+
+    // Account Tabs
+    document.querySelectorAll('.account-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const container = btn.closest('.sub-tab-container');
+        container.querySelectorAll('.account-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const tabContentContainer = document.getElementById('accounts');
+        tabContentContainer.querySelectorAll('.account-tab-content').forEach(tab => tab.classList.remove('active'));
+        tabContentContainer.querySelector(`#${btn.dataset.tab}`).classList.add('active');
+
+        // Render accounts when switching to the 'existing' tab
+        if (btn.dataset.tab === 'existing') {
+          renderAccounts();
+        }
+      }); // ✅ properly closes both the function and event listener
+    });
+
+    // Hide sector for BNS
+    document.getElementById('accountRole').addEventListener('change', function() {
+      const role = this.value;
+      document.getElementById('sectorField').style.display = role === 'BHW' ? 'block' : 'none';
+    });
+    // Initial hide since default is BNS
+    document.getElementById('sectorField').style.display = 'none';
+
+    // Report Sub-tabs
+document.querySelectorAll('.report-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const container = btn.closest('.sub-tab-container');
+    container.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const tabContentContainer = document.getElementById('reports');
+    tabContentContainer.querySelectorAll('.report-tab-content').forEach(tab => tab.classList.remove('active'));
+    tabContentContainer.querySelector(`#${btn.dataset.tab}`).classList.add('active');
+
+    if (btn.dataset.tab === 'medical-needs') {
+      renderNeedsTable();
+    }
+  }); // ✅ properly closed parentheses and braces
+});
+
+
+    // Schedule stub
+    function renderSchedule(){document.getElementById('scheduleList').innerHTML="Coming soon...";}
+
+    // Medical Needs
+    function renderNeedsTable() {
+      const tbody = document.querySelector('#needsTable tbody');
+      tbody.innerHTML = "";
+
+      if (currentMHOData.length === 0) {
+        document.getElementById("needsEmpty").style.display = "block";
+        return;
+      } else {
+        document.getElementById("needsEmpty").style.display = "none";
+      }
+
+      currentMHOData.forEach(child => {
+        const mapped = mapChildData(child);
+        let needs = [];
+        const vaccines = ["BCG (At Birth)", "HEPA B (At Birth)", "PENTA 1 ( 1 1/2 mos.)", "PENTA 2 ( 2 1/2 mos.)", "PENTA 3 ( 3 1/2 mos.)", "OPV 1  ( 1 1/2 mos.)", "OPV 2  ( 2 1/2 mos.)", "OPV 3  ( 3 1/2 mos.)", "IPV1  ( 3 1/2 mos.)", "IPV2  ( 9 mos.)", "PCV1  ( 1 1/2 mos.)", "PCV2  ( 2 1/2 mos.)", "PCV3  ( 3 1/2 mos.)", "MCV1 (9 mos.)", "MCV2 (12 mos. & 29 days)"];
+        vaccines.forEach(v => {
+          if (!mapped[v]) needs.push(v); // if no date
+        });
+        if (needs.length > 0) {
+          tbody.innerHTML += `<tr><td class="border border-gray-300 px-4 py-2">${mapped["Name of Children"]}</td><td class="border border-gray-300 px-4 py-2">${mapped["Age in Months"]}</td><td class="border border-gray-300 px-4 py-2">${mapped["Date of Birth"]}</td><td class="border border-gray-300 px-4 py-2">${mapped["Name of Parent"]}</td><td class="border border-gray-300 px-4 py-2">${needs.join(", ")}</td></tr>`;
+        }
+      });
+    }
+
+
+    // Download function
+    function downloadData(type){
+      let rows=[["Name of Children","Age in Months","Date of Birth","Name of Parent","Barangay","Sector","BCG (At Birth)","HEPA B (At Birth)","PENTA 1 ( 1 1/2 mos.)","PENTA 2 ( 2 1/2 mos.)","PENTA 3 ( 3 1/2 mos.)","OPV 1  ( 1 1/2 mos.)","OPV 2  ( 2 1/2 mos.)","OPV 3  ( 3 1/2 mos.)","IPV1  ( 3 1/2 mos.)","IPV2  ( 9 mos.)","PCV1  ( 1 1/2 mos.)","PCV2  ( 2 1/2 mos.)","PCV3  ( 3 1/2 mos.)","MCV1 (9 mos.)","MCV2 (12 mos. & 29 days)","BHW Email"]];
+      currentMHOData.forEach(child=>{
+        const mapped = mapChildData(child);
+        rows.push([
+          mapped["Name of Children"], mapped["Age in Months"], mapped["Date of Birth"], mapped["Name of Parent"], mapped.Barangay, mapped.Sector,
+          mapped["BCG (At Birth)"], mapped["HEPA B (At Birth)"], mapped["PENTA 1 ( 1 1/2 mos.)"], mapped["PENTA 2 ( 2 1/2 mos.)"], mapped["PENTA 3 ( 3 1/2 mos.)"],
+          mapped["OPV 1  ( 1 1/2 mos.)"], mapped["OPV 2  ( 2 1/2 mos.)"], mapped["OPV 3  ( 3 1/2 mos.)"], mapped["IPV1  ( 3 1/2 mos.)"], mapped["IPV2  ( 9 mos.)"],
+          mapped["PCV1  ( 1 1/2 mos.)"], mapped["PCV2  ( 2 1/2 mos.)"], mapped["PCV3  ( 3 1/2 mos.)"], mapped["MCV1 (9 mos.)"], mapped["MCV2 (12 mos. & 29 days)"], mapped.bhwEmail
+        ]);
+      });
+      
+      if(type==="csv"){
+        let csv=rows.map(r=>r.join(",")).join("\n");
+        let blob=new Blob([csv],{type:"text/csv"});
+        let a=document.createElement("a");
+        a.href=URL.createObjectURL(blob);
+        a.download="records.csv";
+        a.click();
+      }
+      if(type==="excel"){
+        let wb=XLSX.utils.book_new();
+        let ws=XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb,ws,"Records");
+        XLSX.writeFile(wb,"records.xlsx");
+      }
+      if(type==="pdf"){
+        const { jsPDF } = window.jspdf;
+        let doc=new jsPDF("landscape"); // landscape for wide table
+
+        const selectedBarangays = Array.from(document.querySelectorAll('#barangayFilterContainer input:checked')).map(cb => cb.value);
+        let title = "Children Records";
+        if(selectedBarangays.length > 0 && selectedBarangays.length < BARANGAYS.length) title += " - " + selectedBarangays.join(', ');
+        
+        doc.setFontSize(14);
+        doc.text(title, 14, 15);
+
+        doc.autoTable({
+          head:[rows[0]],
+          body:rows.slice(1),
+          startY:20,
+          theme:'grid',
+          styles:{ fontSize:7, cellPadding:2, overflow:"linebreak", halign:"center", valign:"middle" },
+          headStyles:{ fillColor:[0,123,255], textColor:255, halign:"center" },
+          didDrawPage:function(data){
+            let pageSize=doc.internal.pageSize;
+            let pageHeight=pageSize.height? pageSize.height: pageSize.getHeight();
+            doc.setFontSize(10);
+            doc.text("Generated on: "+new Date().toLocaleString(),14,pageHeight-10);
+            let pageCount=doc.internal.getNumberOfPages();
+            doc.text("Page "+doc.internal.getCurrentPageInfo().pageNumber+" of "+pageCount,pageSize.width-50,pageHeight-10);
+          }
+        });
+        doc.save("records.pdf");
+      }
+    }
+
+    // Update home stats
+    const allData = loadAllChildrenData();
+    document.getElementById('totalChildren').textContent = allData.length;
+    const fullyVaccinated = allData.filter(child => {
+      const vaccines = ["BCG (At Birth)", "HEPA B (At Birth)", "PENTA 1 ( 1 1/2 mos.)", "PENTA 2 ( 2 1/2 mos.)", "PENTA 3 ( 3 1/2 mos.)", "OPV 1  ( 1 1/2 mos.)", "OPV 2  ( 2 1/2 mos.)", "OPV 3  ( 3 1/2 mos.)", "IPV1  ( 3 1/2 mos.)", "IPV2  ( 9 mos.)", "PCV1  ( 1 1/2 mos.)", "PCV2  ( 2 1/2 mos.)", "PCV3  ( 3 1/2 mos.)", "MCV1 (9 mos.)", "MCV2 (12 mos. & 29 days)"];
+      return vaccines.every(v => child[v]);
+    }).length;
+    document.getElementById('fullyVaccinated').textContent = fullyVaccinated;
+    document.getElementById('pendingVaccines').textContent = allData.length - fullyVaccinated;
+    document.getElementById('totalAccounts').textContent = bhwBnsProfiles.length;
+
+    const LS = { role: "hp_role", email: "hp_email", barangay: "hp_barangay", sector: "hp_sector" };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Logout Modal Logic
+      document.getElementById('confirmLogout').addEventListener('click', function() {
+        localStorage.removeItem(LS.role);
+        localStorage.removeItem(LS.email);
+        localStorage.removeItem(LS.barangay);
+        localStorage.removeItem(LS.sector);
+        localStorage.removeItem("loggedInUser");
+        window.location.href = 'index.html';
+      });
+
+      document.getElementById('cancelLogout').addEventListener('click', function() {
+        document.getElementById('logoutModal').style.display = 'none';
+      });
+
+      // Auto calculate age from birthday
+      document.getElementById('accountBirthday').addEventListener('change', function() {
+        const birthday = new Date(this.value);
+        const today = new Date();
+        let age = today.getFullYear() - birthday.getFullYear();
+        const monthDiff = today.getMonth() - birthday.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthday.getDate())) {
+          age--;
+        }
+        const ageInput = document.getElementById('accountAge');
+        if (age >= 0) ageInput.value = age; else ageInput.value = '';
+      });
+    });
+
+    setupFilterCheckboxes('barangayFilterContainer');
+    setupFilterCheckboxes('yearFilterContainer');
+    setupFilterCheckboxes('monthFilterContainer');
+
+    function logout() { document.getElementById('logoutModal').style.display = 'block'; }
+</script>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="modal">
+  <div class="modal-content">
+    <p>Are you sure you want to log out?</p>
+    <button id="confirmLogout" class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600">Yes</button>
+    <button id="cancelLogout" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600">No</button>
+  </div>
+</div>
+
+</body>
+</html>

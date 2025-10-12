@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BNS Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&amp;family=Lato:wght@300;400;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "primary": "#90EE90",
+        "secondary": "#43A047",
+        "accent": "#A5D6A7",
+        "background-light": "#F9FAFB", // Gray-50
+        "background-dark": "#1F2937", // Gray-800
+        "text-light": "#1B5E20", // Green-800
+        "text-dark": "#F9FAFB", // Gray-50
+      },
+      fontFamily: {
+        "display": ["Roboto", "sans-serif"],
+        "body": ["Lato", "sans-serif"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.5rem",
+        "lg": "0.75rem",
+        "xl": "1rem",
+        "full": "9999px"
+      },
+    },
+  },
+}
+</script>
+<link rel="stylesheet" href="css/style.css" />
+<style>
+nav button.active { text-decoration: underline; }
+</style>
+<style>
+  .tab-btn { cursor:pointer; margin-right:10px; padding:5px 10px; }
+  .tab-btn.active { text-decoration: underline; }
+  .tab-content { display:none; margin-top:20px; }
+  .tab-content.active { display:block; }
+
+  /* Dropdown menu for download */
+  .dropdown { position: relative; display: inline-block; }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 140px;
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .dropdown-content button {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .dropdown-content button:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
+  .show { display: block; }
+
+  .table-container th {
+    background-color: #e9ecef;
+  }
+
+  .badge.vaccinated { background-color: #22c55e; color: #fff; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+  .badge.not-vaccinated { background-color: #fbbf24; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+
+  /* Logout Modal */
+  .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+  .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; text-align: center; border-radius: 8px; }
+  .modal-content p { margin-bottom: 20px; }
+  .modal-content button { margin: 0 10px; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+  #confirmLogout { background: #dc3545; color: white; }
+  #cancelLogout { background: #6c757d; color: white; }
+</style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-body text-text-light dark:text-text-dark">
+
+<header class="flex items-center justify-between whitespace-nowrap bg-primary px-6 py-4 shadow-md sticky top-0 z-50">
+  <div class="flex items-center gap-2 sm:gap-4 text-text-light dark:text-text-dark">
+    <span class="material-symbols-outlined text-3xl sm:text-4xl text-primary">health_and_safety</span>
+    <h2 class="text-xl sm:text-2xl font-bold leading-tight tracking-[-0.015em] font-display">BNS Dashboard</h2>
+  </div>
+  <nav class="flex items-center gap-4">
+    <button class="text-lg font-medium leading-normal hover:text-primary transition-colors active" onclick="openTab('homeTab', this)">Home</button>
+    <button class="text-lg font-medium leading-normal hover:text-primary transition-colors" onclick="openTab('childrenTab', this)">Children Records</button>
+    <button class="text-lg font-medium leading-normal hover:text-primary transition-colors" onclick="openTab('profileTab', this)">Profiles</button>
+    <button onclick="logout()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 sm:h-12 sm:px-6 bg-primary text-white text-sm sm:text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-opacity">
+      <span class="truncate">Logout</span>
+    </button>
+  </nav>
+</header>
+
+<main class="container max-w-full mx-auto px-10 py-12">
+  <h2>BNS Dashboard</h2>
+  <p>Barangay: <strong id="bnsBarangay"></strong></p>
+
+
+
+  <!-- Home Tab -->
+  <div id="homeTab" class="tab-content active">
+    <h3 class="text-2xl font-semibold mb-4">Welcome to BNS Dashboard</h3>
+    <p class="mb-6">Manage children immunization records and BHW profiles for your barangay.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h4 class="text-lg font-medium mb-2">Total Children</h4>
+        <p id="totalChildren" class="text-3xl font-bold text-primary">0</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h4 class="text-lg font-medium mb-2">Total BHWs</h4>
+        <p id="totalBHWs" class="text-3xl font-bold text-primary">0</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h4 class="text-lg font-medium mb-2">Your Barangay</h4>
+        <p id="homeBarangay" class="text-xl font-semibold">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Children Records Tab -->
+  <div id="childrenTab" class="tab-content">
+    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+      <!-- Download dropdown -->
+      <div class="dropdown">
+        <button class="btn bg-white border border-gray-300 rounded-md px-4 py-2" onclick="toggleDropdown()">Download Report</button>
+        <div id="downloadMenu" class="dropdown-content">
+          <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadReport('csv')">CSV</button>
+          <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadReport('xlsx')">Excel (.xlsx)</button>
+          <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100" onclick="downloadReport('pdf')">PDF</button>
+        </div>
+      </div>
+      <div class="relative inline-block">
+        <button class="btn bg-white border border-gray-300 rounded-md px-4 py-2" onclick="toggleFilterDropdown()">Filter ▼</button>
+        <div class="filter-bar" id="filterBar" style="display:none; position: absolute; right: 0; z-index: 20;">
+          <div class="bg-white shadow-md p-4 rounded-lg mt-2 relative">
+            <button onclick="toggleFilterDropdown()" class="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+            <div class="flex gap-6 items-start">
+              <div>
+                <h4 class="font-medium text-sm mb-2 border-b">BHW</h4>
+                <div id="bhwFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                  <!-- BHW checkboxes will be populated by JS -->
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-sm mb-2 border-b">Year</h4>
+                <div id="yearFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                  <!-- Year checkboxes will be populated by JS -->
+                </div>
+              </div>
+              <div>
+                <h4 class="font-medium text-sm mb-2 border-b">Month</h4>
+                <div id="monthFilterContainer" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+                  <!-- Month checkboxes will be populated by JS -->
+                </div>
+              </div>
+            </div>
+            <div class="flex gap-3 items-center mt-4">
+              <button onclick="applyFilter()" class="bg-primary text-white px-3 py-1 text-sm rounded-md hover:bg-secondary transition">Apply</button>
+              <button onclick="clearFilter()" class="bg-gray-500 text-white px-3 py-1 text-sm rounded-md hover:bg-gray-600 transition">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="filterInfo" class="text-sm text-gray-600 mt-2" style="display: none;"></div>
+
+    <div class="table-container" style="overflow-x:auto; margin-top:10px;">
+      <table class="table" id="childrenTable">
+        <thead>
+          <tr>
+            <th>Name of Children</th>
+            <th>Age in months</th>
+            <th>Parent Name</th>
+            <th>Barangay</th>
+            <th>Sector</th>
+            <th>Report Date</th>
+  <th>BCG (At Birth)</th><th>HEPA B (At Birth)</th><th>PENTA 1 (1 1/2 mos.)</th><th>PENTA 2 (1 1/2 mos.)</th><th>PENTA 3 (1 1/2 mos.)</th>
+  <th>OPV1 (1 1/2 mos.)</th><th>OPV2 (2 1/2 mos.)</th><th>OPV3 (3 1/2 mos.)</th><th>IPV1 (3 1/2 mos.)</th><th>IPV2 (9 mos.)</th>
+  <th>PCV1 (1 1/2 mos.)</th><th>PCV2 (2 1/2 mos.)</th><th>PCV3 (3 1/2 mos.)</th><th>MCV1 (9 mos.)</th><th>MCV2 (12 mos. & 29 days)</th>
+            <th>BHW Email</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Profiles Tab -->
+  <div id="profileTab" class="tab-content">
+    <!-- BNS User Profile Section -->
+    <div class="bns-profile-section mb-8 p-6 bg-gray-50 rounded-lg">
+      <h3 class="text-lg font-semibold mb-4">Your Profile (BNS)</h3>
+      <div id="bnsProfileInfo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Placeholder content will be populated by JS -->
+        <p><strong>Name:</strong> <span id="bnsName">Loading...</span></p>
+        <p><strong>Email:</strong> <span id="bnsEmail">Loading...</span></p>
+        <p><strong>Barangay:</strong> <span id="bnsBarangayProfile">Loading...</span></p>
+        <p><strong>Sector:</strong> <span id="bnsSector">Loading...</span></p>
+      </div>
+    </div>
+
+    <!-- BHW Profiles Section -->
+    <h3 class="text-lg font-semibold mb-4">BHW Profiles</h3>
+    <div class="table-container" style="overflow-x:auto;">
+      <table class="table" id="profileTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Email</th><th>Barangay</th><th>Sector</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- External libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+// Logged-in BNS info
+const loggedInUser = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+document.getElementById("bnsBarangay").textContent = loggedInUser.barangay || "All";
+
+// Load children and BHW profiles
+let childrenData = [];
+const bhwBnsProfiles = JSON.parse(localStorage.getItem("bhwBnsProfiles") || "[]");
+const bhwsInBNSBarangay = bhwBnsProfiles.filter(p => p.role === "BHW");
+
+bhwsInBNSBarangay.forEach(bhw => {
+    const key = `hp_children_${bhw.barangay}__${bhw.sector}`;
+    const bhwChildren = JSON.parse(localStorage.getItem(key) || "[]");
+    bhwChildren.forEach(child => child.bhwEmail = bhw.email);
+    childrenData = childrenData.concat(bhwChildren);
+});
+
+const YEARS = [2020, 2021, 2022, 2023, 2024, 2025];
+const MONTHS = [{v:"01",l:"January"},{v:"02",l:"February"},{v:"03",l:"March"},{v:"04",l:"April"},{v:"05",l:"May"},{v:"06",l:"June"},{v:"07",l:"July"},{v:"08",l:"August"},{v:"09",l:"September"},{v:"10",l:"October"},{v:"11",l:"November"},{v:"12",l:"December"}];
+
+const bhwProfiles = bhwBnsProfiles.filter(p => p.role === "BHW");
+let filteredChildren = childrenData;
+
+// Populate filter selects
+const bhwContainer = document.getElementById('bhwFilterContainer');
+bhwContainer.innerHTML = `
+  <label class="flex items-center text-sm font-semibold">
+    <input type="checkbox" name="bhw" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+    <span class="ml-2">Select All</span>
+  </label>
+`;
+bhwProfiles.forEach(b => {
+  bhwContainer.innerHTML += `
+    <label class="flex items-center text-sm">
+      <input type="checkbox" name="bhw" value="${b.email}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+      <span class="ml-2">${b.name} (${b.sector})</span>
+    </label>
+  `;
+});
+
+const yearContainer = document.getElementById('yearFilterContainer');
+yearContainer.innerHTML = `
+  <label class="flex items-center text-sm font-semibold">
+    <input type="checkbox" name="year" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+    <span class="ml-2">Select All</span>
+  </label>
+`;
+YEARS.forEach(y => {
+  yearContainer.innerHTML += `
+    <label class="flex items-center text-sm">
+      <input type="checkbox" name="year" value="${y}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+      <span class="ml-2">${y}</span>
+    </label>
+  `;
+});
+
+const monthContainer = document.getElementById('monthFilterContainer');
+monthContainer.innerHTML = `
+  <label class="flex items-center text-sm font-semibold">
+    <input type="checkbox" name="month" value="all" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary">
+    <span class="ml-2">Select All</span>
+  </label>
+`;
+MONTHS.forEach(month => {
+  monthContainer.innerHTML += `
+    <label class="flex items-center text-sm">
+      <input type="checkbox" name="month" value="${month.v}" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary filter-option">
+      <span class="ml-2">${month.l}</span>
+    </label>
+  `;
+});
+
+function setupFilterCheckboxes(containerId) {
+    const container = document.getElementById(containerId);
+    const selectAll = container.querySelector('input[value="all"]');
+    const options = container.querySelectorAll('.filter-option');
+    selectAll.addEventListener('change', () => {
+        options.forEach(opt => opt.checked = selectAll.checked);
+    });
+}
+
+function toggleFilterDropdown() {
+  const d = document.getElementById('filterBar');
+  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
+
+function applyFilter() {
+  const selectedBHWs = Array.from(document.querySelectorAll('#bhwFilterContainer input:checked')).map(cb => cb.value);
+  const selectedYears = Array.from(document.querySelectorAll('#yearFilterContainer input:checked')).map(cb => cb.value);
+  const selectedMonths = Array.from(document.querySelectorAll('#monthFilterContainer input:checked')).map(cb => cb.value);
+
+  filteredChildren = childrenData.filter(child => {
+    const bhwMatch = selectedBHWs.length === 0 || selectedBHWs.includes(child.bhwEmail);
+    const hasYearFilter = selectedYears.length > 0;
+    const hasMonthFilter = selectedMonths.length > 0;
+
+    if (!hasYearFilter && !hasMonthFilter) return bhwMatch;
+
+    let dateMatches = false;
+    // Prioritize Report Date for filtering
+    if (child["Report Date"] && child["Report Date"].includes('/')) {
+      const [reportMonth, reportYear] = child["Report Date"].split('/');
+      const yearMatches = !hasYearFilter || selectedYears.includes(reportYear);
+      const monthMatches = !hasMonthFilter || selectedMonths.includes(reportMonth);
+      dateMatches = yearMatches && monthMatches;
+    } else {
+      // Fallback for old data without Report Date (using DOB)
+      const dob = child["Date of Birth"]; // e.g., "mm/dd/yyyy"
+      if (dob && dob.includes('/')) {
+        const dobParts = dob.split('/');
+        if (dobParts.length === 3) { // mm/dd/yyyy
+          const month = dobParts[0].padStart(2, '0');
+          const year = dobParts[2];
+          const yearMatches = !hasYearFilter || selectedYears.includes(year);
+          const monthMatches = !hasMonthFilter || selectedMonths.includes(month);
+          dateMatches = yearMatches && monthMatches;
+        }
+      }
+    }
+    return bhwMatch && dateMatches;
+  });
+  renderChildrenTable();
+  updateFilterInfo(selectedBHWs, selectedYears, selectedMonths);
+  toggleFilterDropdown();
+}
+
+function updateFilterInfo(bhws, years, months) {
+  const infoDiv = document.getElementById('filterInfo');
+  let infoText = [];
+  if (bhws.length > 0) {
+    const bhwNames = bhws.map(email => bhwProfiles.find(p => p.email === email)?.name || email);
+    infoText.push(`<strong>BHW:</strong> ${bhwNames.join(', ')}`);
+  }
+  if (years.length > 0) {
+    infoText.push(`<strong>Year:</strong> ${years.join(', ')}`);
+  }
+  if (months.length > 0) {
+    const monthNames = months.map(mVal => MONTHS.find(m => m.v === mVal)?.l || mVal);
+    infoText.push(`<strong>Months:</strong> ${monthNames.join(', ')}`);
+  }
+
+  if (infoText.length > 0) {
+    infoDiv.innerHTML = `Filtering by: ${infoText.join('; ')}`;
+    infoDiv.style.display = 'block';
+  } else {
+    infoDiv.style.display = 'none';
+  }
+}
+
+function clearFilter() {
+  document.querySelectorAll('#filterBar input[type="checkbox"]').forEach(cb => cb.checked = false);
+  filteredChildren = childrenData;
+  renderChildrenTable();
+  updateFilterInfo([], [], []);
+  toggleFilterDropdown();
+}
+
+function formatReportDateForDisplay(reportDate) {
+  if (!reportDate || !reportDate.includes('/')) return reportDate || '';
+  const [month, year] = reportDate.split('/');
+  const monthName = MONTHS.find(m => m.v === month)?.l || 'Unknown';
+  return `${monthName} ${year}`;
+}
+
+// Render children table
+function renderChildrenTable() {
+  const tbody = document.querySelector("#childrenTable tbody");
+  tbody.innerHTML = "";
+  filteredChildren.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c["Name of Children"] || ""}</td>
+      <td>${c["Age in Months"] || ""}</td>
+      <td>${c["Name of Parent"] || ""}</td>
+      <td>${c.Barangay || ""}</td>
+      <td>${c.Sector || ""}</td>
+      <td>${formatReportDateForDisplay(c["Report Date"])}</td>
+      <td><span class="badge ${c["BCG (At Birth)"]?"vaccinated":"not-vaccinated"}">${c["BCG (At Birth)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["HEPA B (At Birth)"]?"vaccinated":"not-vaccinated"}">${c["HEPA B (At Birth)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PENTA 1 (1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PENTA 1 (1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PENTA 2 (1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PENTA 2 (1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PENTA 3 (1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PENTA 3 (1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["OPV1 (1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["OPV1 (1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["OPV2 (2 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["OPV2 (2 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["OPV3 (3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["OPV3 (3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["IPV1 (3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["IPV1 (3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["IPV2 (9 mos.)"]?"vaccinated":"not-vaccinated"}">${c["IPV2 (9 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PCV1 (1 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PCV1 (1 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PCV2 (2 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PCV2 (2 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["PCV3 (3 1/2 mos.)"]?"vaccinated":"not-vaccinated"}">${c["PCV3 (3 1/2 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["MCV1 (9 mos.)"]?"vaccinated":"not-vaccinated"}">${c["MCV1 (9 mos.)"] || "Not Vaccinated"}</span></td>
+      <td><span class="badge ${c["MCV2 (12 mos. & 29 days)"]?"vaccinated":"not-vaccinated"}">${c["MCV2 (12 mos. & 29 days)"] || "Not Vaccinated"}</span></td>
+      <td>${c.bhwEmail || ""}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Render home stats
+function renderHome() {
+  document.getElementById('totalChildren').textContent = childrenData.length;
+  document.getElementById('totalBHWs').textContent = bhwProfiles.length;
+  document.getElementById('homeBarangay').textContent = loggedInUser.barangay || "All";
+}
+
+// Render BNS profile info
+function renderBNSProfile() {
+  const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
+  document.getElementById("bnsName").textContent = user.name || "Placeholder BNS Name";
+  document.getElementById("bnsEmail").textContent = user.email || "placeholder@bns.com";
+  document.getElementById("bnsBarangayProfile").textContent = user.barangay || "All Barangays";
+  document.getElementById("bnsSector").textContent = user.sector || "N/A";
+}
+
+// Render BHW profiles table
+function renderProfileTable() {
+  const tbody = document.querySelector("#profileTable tbody");
+  tbody.innerHTML = "";
+  bhwProfiles.forEach(b => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${b.name}</td><td>${b.email}</td><td>${b.barangay}</td><td>${b.sector}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Tab switcher
+function openTab(tabId, btn) {
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  btn.classList.add("active");
+}
+
+// Toggle dropdown
+function toggleDropdown() {
+  document.getElementById("downloadMenu").classList.toggle("show");
+}
+window.onclick = function(event) {
+  if (!event.target.matches('.btn')) {
+    document.querySelectorAll(".dropdown-content").forEach(menu => menu.classList.remove("show"));
+  }
+}
+
+// Download report
+function downloadReport(type){
+  if(filteredChildren.length===0){ document.getElementById('noDataModal').style.display = 'block'; return; }
+  
+  if(type==="csv"){
+    const allKeys = new Set();
+    filteredChildren.forEach(row => Object.keys(row).forEach(key => allKeys.add(key)));
+    const headers = Array.from(allKeys);
+
+    let csv = headers.join(",") + "\n";
+    filteredChildren.forEach(row => {
+        const values = headers.map(header => {
+            const val = row[header];
+            if (val === undefined || val === null) return "";
+            const s = String(val);
+            return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+        });
+        csv += values.join(",") + "\n";
+    });
+
+    const blob = new Blob([csv],{type:"text/csv"});
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "children_report.csv";
+    link.click();
+  } 
+  else if(type==="xlsx"){
+    const ws = XLSX.utils.json_to_sheet(filteredChildren);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb,"children_report.xlsx");
+  }
+  else if(type==="pdf"){
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text("Children Report", 14, 10);
+    doc.autoTable({
+      head: [Object.keys(filteredChildren[0])],
+      body: filteredChildren.map(obj => Object.values(obj)),
+      startY: 20,
+      styles: { fontSize: 8 }
+    });
+    doc.save("children_report.pdf");
+  }
+}
+
+// Initialize
+renderHome();
+renderChildrenTable();
+renderProfileTable();
+renderBNSProfile();
+
+  // Setup "Select All" functionality for filters
+  setupFilterCheckboxes('bhwFilterContainer');
+  setupFilterCheckboxes('yearFilterContainer');
+  setupFilterCheckboxes('monthFilterContainer');
+
+  const LS = { role: "hp_role", email: "hp_email", barangay: "hp_barangay", sector: "hp_sector" };
+
+  function logout() {
+    document.getElementById('logoutModal').style.display = 'block';
+  }
+
+  // Modal event listeners
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmLogout').addEventListener('click', function() {
+      localStorage.removeItem(LS.role);
+      localStorage.removeItem(LS.email);
+      localStorage.removeItem(LS.barangay);
+      localStorage.removeItem(LS.sector);
+      localStorage.removeItem("loggedInUser");
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('cancelLogout').addEventListener('click', function() {
+      document.getElementById('logoutModal').style.display = 'none';
+    });
+
+    document.getElementById('closeNoDataModal').addEventListener('click', function() {
+      document.getElementById('noDataModal').style.display = 'none';
+    });
+  });
+</script>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="modal">
+  <div class="modal-content">
+    <p>Are you sure you want to log out?</p>
+    <button id="confirmLogout" class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600">Yes</button>
+    <button id="cancelLogout" class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600">No</button>
+  </div>
+</div>
+
+<script>
+</script>
+<!-- No Data Modal -->
+<div id="noDataModal" class="modal">
+  <div class="modal-content">
+    <p>No data available for download.</p>
+    <button id="closeNoDataModal" class="bg-primary text-white px-6 py-2 rounded-md hover:bg-secondary">OK</button>
+  </div>
+</div>
+</body>
+</html>
